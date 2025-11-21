@@ -398,6 +398,28 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet3
 
+  RDSSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "RDS Subnet Group"
+      SubnetIds:
+        !If
+          - CreateThreePrivateSubnets
+          - [!Ref PrivateSubnet1, !Ref PrivateSubnet2, !Ref PrivateSubnet3]
+          - !If
+            - CreateTwoPrivateSubnets
+            - [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+            - [!Ref PrivateSubnet1]
+      Tags:
+        - Key: Name
+          Value: !Sub ${NuonInstallID}-rds-subnet-group
+        - Key: "install.nuon.co/id"
+          Value: !Ref NuonInstallID
+        - Key: "org.nuon.co/id"
+          Value: !Ref NuonOrgID
+        - Key: "app.nuon.co/id"
+          Value: !Ref NuonAppID
+
 Outputs:
   VPC:
     Description: The VPC.
@@ -424,3 +446,7 @@ Outputs:
   RunnerSubnet:
     Description: The dedicated private subnet for the runner.
     Value: !Ref RunnerSubnet
+
+  RDSSubnetGroup:
+    Description: The RDS Subnet Group.
+    Value: !Ref RDSSubnetGroup
